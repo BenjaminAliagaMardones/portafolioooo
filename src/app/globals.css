@@ -1,26 +1,63 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@font-face {
+  font-family: 'Ubuntu Sans Bold';
+  src: url('/fonts/UbuntuSans-Bold_5.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@font-face {
+  font-family: 'Cousine Bold';
+  src: url('/fonts/Cousine-Bold_6.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes color-change {
+  0%, 100% {
+    color: #111827; /* gray-900 */
+  }
+  50% {
+    color: #6b7280; /* gray-500 */
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-color-change {
+  animation: color-change 1.5s ease-in-out infinite;
+}
+
+@keyframes typing {
+  0% { content: ""; }
+  5% { content: "I"; }
+  10% { content: "In"; }
+  15% { content: "Ing"; }
+  20% { content: "Inge"; }
+  25% { content: "Ingen"; }
+  30% { content: "Ingeni"; }
+  35% { content: "Ingenie"; }
+  40% { content: "Ingenier"; }
+  45% { content: "Ingenierí"; }
+  50% { content: "Ingeniería Informática"; }
+  55% { content: "Ingeniería Informática"; }
+  60% { content: ""; }
+  65% { content: "D"; }
+  70% { content: "De"; }
+  75% { content: "Des"; }
+  80% { content: "Desa"; }
+  85% { content: "Desar"; }
+  90% { content: "Desarr"; }
+  95% { content: "Desarrollo Backend"; }
+  100% { content: "Desarrollo Backend"; }
+}
+
+.typing-text::before {
+  content: "";
+  animation: typing 8s infinite;
+}
+
+:root {
+  color-scheme: light;
 }
