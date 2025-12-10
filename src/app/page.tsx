@@ -13,11 +13,52 @@ const navItems = [
 
 const roles = ["Ingeniería Informática", "Desarrollo Backend"];
 
+const projects = [
+  {
+    title: "CooperaPyme",
+    description: "Plataforma que conecta PYMEs para comunicarse, generar redes de apoyo y crear oportunidades de negocio.",
+    image: "/img/project1.png",
+    tags: ["Next.js", "React", "TypeScript", "Tailwind", "Django", "PostgreSQl"],
+    link: "https://integra-1-2-0.vercel.app/",
+    linkText: "Ver Proyecto"
+  },
+  {
+    title: "TREEJS",
+    description: "Aplicación web interactiva con animaciones 3D creadas con Three.js.",
+    image: "/img/project2.png",
+    tags: ["Three.js", "JavaScript", "WebGL", "3D"],
+    link: "#",
+    linkText: "Ver Proyecto"
+  },
+  {
+    title: "Entropy Evolve",
+    description: "Sistema de automatización para agentes de IA, diseñado para dominios complejos con ingeniería de software.",
+    image: "/img/project3.png",
+    tags: ["Python", "AI", "Machine Learning"],
+    link: "#",
+    linkText: "GitHub"
+  }
+];
+
 export default function Home() {
   const [displayText, setDisplayText] = useState("");
   const [roleIndex, setRoleIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [charIndex, setCharIndex] = useState(0);
+  const [activeSection, setActiveSection] = useState("inicio");
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [showAboutImage, setShowAboutImage] = useState(false);
+  const [showAboutTitle, setShowAboutTitle] = useState(false);
+  const [showAboutInfo, setShowAboutInfo] = useState(false);
+  const [showAboutEducation, setShowAboutEducation] = useState(false);
+  const [showAboutExperience, setShowAboutExperience] = useState(false);
+  const [showAboutSkills, setShowAboutSkills] = useState(false);
+  const [showProjectsTitle, setShowProjectsTitle] = useState(false);
+  const [showProjectsCards, setShowProjectsCards] = useState<boolean[]>([false, false, false]);
+
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
 
   useEffect(() => {
     const currentRole = roles[roleIndex];
@@ -42,27 +83,98 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [charIndex, isDeleting, roleIndex]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const aboutSection = document.getElementById("acerca");
+      if (aboutSection) {
+        const rect = aboutSection.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+        if (isVisible && !showAboutImage) {
+          setShowAboutImage(true);
+          setTimeout(() => setShowAboutTitle(true), 200);
+          setTimeout(() => setShowAboutInfo(true), 400);
+          setTimeout(() => setShowAboutEducation(true), 600);
+          setTimeout(() => setShowAboutExperience(true), 800);
+          setTimeout(() => setShowAboutSkills(true), 1000);
+        }
+      }
+
+      const projectsSection = document.getElementById("proyectos");
+      if (projectsSection) {
+        const rect = projectsSection.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+        if (isVisible && !showProjectsTitle) {
+          setShowProjectsTitle(true);
+          setTimeout(() => setShowProjectsCards([true, false, false]), 200);
+          setTimeout(() => setShowProjectsCards([true, true, false]), 400);
+          setTimeout(() => setShowProjectsCards([true, true, true]), 600);
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Check on mount
+    
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [showAboutImage, showProjectsTitle]);
+
+  const handleNavClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const sectionId = href.replace("#", "");
+    setActiveSection(sectionId);
+    
+    if (sectionId === "acerca") {
+      setShowAboutImage(false);
+      setShowAboutTitle(false);
+      setShowAboutInfo(false);
+      setShowAboutEducation(false);
+      setShowAboutExperience(false);
+      setShowAboutSkills(false);
+      setTimeout(() => {
+        setShowAboutImage(true);
+        setTimeout(() => setShowAboutTitle(true), 200);
+        setTimeout(() => setShowAboutInfo(true), 400);
+        setTimeout(() => setShowAboutEducation(true), 600);
+        setTimeout(() => setShowAboutExperience(true), 800);
+        setTimeout(() => setShowAboutSkills(true), 1000);
+      }, 100);
+    }
+    
+    if (sectionId === "inicio") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-white">
+    <main className={`min-h-screen bg-white transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
       {/* Navbar flotante */}
       <header className="sticky top-0 z-50 flex justify-center pt-6 pb-6">
         <div className="rounded-full border border-gray-200 bg-white/90 px-3 py-3 shadow-xl backdrop-blur-sm">
           <nav className="flex items-center gap-2">
-            {navItems.map((item, i) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className={[
-                  "flex items-center gap-2 rounded-full px-6 py-3 text-base font-medium transition-all duration-200",
-                  i === 0
-                    ? "bg-black text-white shadow-md"
-                    : "text-gray-700 hover:bg-gray-100",
-                ].join(" ")}
-              >
-                {item.icon && <item.icon className="h-4 w-4" />}
-                {item.label}
-              </a>
-            ))}
+            {navItems.map((item) => {
+              const sectionId = item.href.replace("#", "");
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(item.href, e)}
+                  className={[
+                    "flex items-center gap-2 rounded-full px-6 py-3 text-base font-medium transition-all duration-200",
+                    activeSection === sectionId
+                      ? "bg-black text-white shadow-md"
+                      : "text-gray-700 hover:bg-gray-100",
+                  ].join(" ")}
+                >
+                  {item.icon && <item.icon className="h-4 w-4" />}
+                  {item.label}
+                </a>
+              );
+            })}
           </nav>
         </div>
       </header>
@@ -70,7 +182,7 @@ export default function Home() {
       {/* HERO */}
       <section
         id="inicio"
-        className="mx-auto grid max-w-screen-2xl gap-12 px-6 pb-20 pt-24 md:grid-cols-2 md:items-start md:pt-32"
+        className="mx-auto grid max-w-screen-2xl gap-12 px-18 pb-20 pt-24 md:grid-cols-2 md:items-start md:pt-32"
       >
         {/* Columna izquierda */}
         <div className="space-y-8">
@@ -82,7 +194,7 @@ export default function Home() {
           {/* Etiqueta estilo "badge" */}
           <div className="inline-block">
             <div className="rounded-lg bg-gray-100 px-6 py-4 border border-gray-200">
-              <span className="text-base font-medium text-gray-700 md:text-5xl" style={{ fontFamily: "'Cousine Bold', monospace" }}>
+              <span className="whitespace-nowrap text-base font-medium text-gray-700 md:text-5xl" style={{ fontFamily: "'Cousine Bold', monospace" }}>
                 {displayText}
                 <span className="animate-pulse text-gray-900">|</span>
               </span>
@@ -162,7 +274,7 @@ export default function Home() {
 
         {/* Columna derecha - Imagen */}
         <div className="flex justify-center md:justify-end md:-mt-8">
-          <div className="relative w-full max-w-2xl">
+          <div className="relative w-full max-w-xl">
             <div className="group relative rounded-4xl bg-white ring-[20px] ring-white transition-all duration-300 cursor-pointer shadow-[0_25px_60px_-18px_rgba(0,0,0,0.32)] hover:ring-[38px] hover:shadow-[0_35px_90px_-28px_rgba(0,0,0,0.4)]">
               {/* Tarjeta de imagen */}
               <div className="relative aspect-square overflow-hidden rounded-3xl">
@@ -181,20 +293,155 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Secciones placeholder */}
-      <section id="acerca" className="mx-auto max-w-screen-2xl px-6 py-20">
-        <h2 className="text-3xl font-bold text-gray-900">Acerca</h2>
-        <p className="mt-4 text-gray-600">
-          Aquí cuentas tu historia breve, stack y enfoque.
-        </p>
+      {/* Sección Acerca de Mí */}
+      <section id="acerca" className="mx-auto max-w-screen-2xl px-18 py-20 pt-40">
+        <div className="grid gap-12 md:grid-cols-2">
+          {/* Columna izquierda - Imagen */}
+          <div className="flex justify-start">
+            <div className="relative w-full max-w-lg">
+              <div className={`relative aspect-[3/4] overflow-hidden rounded-2xl shadow-2xl transition-all duration-1000 ${showAboutImage ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+                <Image
+                  src="/img/img2.png"
+                  alt="Acerca de mí"
+                  width={600}
+                  height={800}
+                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-110"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Columna derecha - Contenido */}
+          <div className="space-y-5">
+            <h2 className={`text-5xl font-[510] tracking-tight transition-all duration-600 hover:scale-105 cursor-default text-gray-900 md:text-6xl lg:text-7xl ${showAboutTitle ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`} style={{ transitionDuration: '600ms' }}>
+              Acerca de <span className="animate-color-change">Mí</span>
+            </h2>
+            
+            {/* Info personal */}
+            <div className={`group cursor-default transition-all duration-600 ${showAboutInfo ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+              <h3 className="text-xl font-semibold text-gray-900 mb-1 transition-all duration-600 group-hover:translate-x-2">Benjamín Aliaga</h3>
+              <p className="text-base leading-relaxed text-gray-500 transition-all duration-600 group-hover:translate-x-2 md:text-lg">
+                Estudiante de segundo año de Ingeniería Civil Informática en la Universidad Católica de Temuco, apasionado por la programación, el desarrollo web y la automatización.
+              </p>
+            </div>
+
+            {/* Educación */}
+            <div className={`group cursor-default transition-all duration-600 ${showAboutEducation ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2 transition-all duration-600 group-hover:translate-x-2">
+                <span className="text-xl">|</span> Educación
+              </h3>
+              <div className="space-y-1">
+                <p className="text-base font-semibold text-gray-900 transition-all duration-600 group-hover:translate-x-2 md:text-lg">Universidad Catolica de Temuco (UCT)</p>
+                <p className="text-base text-gray-500 transition-all duration-600 group-hover:translate-x-2 md:text-lg">Licenciatura en Ingeniería Civil Informatica</p>
+                <p className="text-sm text-gray-500 transition-all duration-600 group-hover:translate-x-2">Actualmente estudiando</p>
+              </div>
+            </div>
+
+            {/* Experiencia */}
+            <div className={`group cursor-default transition-all duration-600 ${showAboutExperience ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2 transition-all duration-600 group-hover:translate-x-2">
+                <span className="text-xl">|</span> Experiencia
+              </h3>
+              <div className="space-y-2">
+                <div>
+                  <p className="text-base font-semibold text-gray-900 transition-all duration-600 group-hover:translate-x-2 md:text-lg">Nada</p>
+                  <p className="text-sm text-gray-500 transition-all duration-600 group-hover:translate-x-2 md:text-base">idk</p>
+                  <p className="text-sm text-gray-500 transition-all duration-600 group-hover:translate-x-2">2025 - Actualmente</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Habilidades Técnicas */}
+            <div className={`transition-all duration-600 ${showAboutSkills ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <span className="text-xl">|</span> Habilidades Técnicas
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {["Python", "AIML", "PyTorch", "TypeScript", "React", "Node.js"].map((skill) => (
+                  <span
+                    key={skill}
+                    className="rounded-full bg-white px-4 py-2 text-sm font-medium text-gray-900 border-2 border-gray-900 transition-all duration-300 hover:bg-gray-900 hover:text-white cursor-pointer"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section id="proyectos" className="bg-gray-50">
-        <div className="mx-auto max-w-screen-2xl px-6 py-20">
-          <h2 className="text-3xl font-bold text-gray-900">Proyectos</h2>
-          <p className="mt-4 text-gray-600">
-            Cards de tus mejores 3-6 proyectos.
-          </p>
+      <section id="proyectos" className="bg-white py-20 pt-40">
+        <div className="mx-auto max-w-screen-2xl px-18">
+          {/* Título */}
+          <div className={`text-center mb-16 transition-all duration-600 ${showProjectsTitle ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+            <h2 className="text-5xl font-[510] tracking-tight text-gray-900 md:text-6xl lg:text-7xl">
+              Mis <span className="animate-color-change">Proyectos</span>
+            </h2>
+            <p className="mt-4 text-lg text-gray-600 md:text-xl">
+              Algunos de los proyectos en los que he trabajado
+            </p>
+          </div>
+
+          {/* Grid de proyectos */}
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {projects.map((project, index) => (
+              <div
+                key={project.title}
+                className={`group relative aspect-square overflow-hidden rounded-3xl bg-white shadow-lg transition-all duration-600 hover:shadow-2xl ${
+                  showProjectsCards[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}
+              >
+                {/* Imagen del proyecto - ocupa aproximadamente 60% */}
+                <div className="relative h-[60%] overflow-hidden bg-gradient-to-br from-blue-900 to-purple-900">
+                  <Image
+                    src={project.image}
+                    alt={project.title}
+                    width={600}
+                    height={600}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
+
+                {/* Contenido - ocupa aproximadamente 40% */}
+                <div className="h-[40%] p-4 flex flex-col justify-between overflow-hidden">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-gray-900 transition-all duration-300 group-hover:translate-x-2 line-clamp-1">
+                      {project.title}
+                    </h3>
+                    
+                    <p className="text-sm leading-tight text-gray-600 line-clamp-2">
+                      {project.description}
+                    </p>
+
+                    {/* Tags de tecnologías */}
+                    <div className="flex flex-wrap gap-1">
+                      {project.tags.slice(0, 4).map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Botón */}
+                  <a
+                    href={project.link}
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-gray-900 transition-all duration-300 hover:translate-x-2"
+                  >
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    {project.linkText}
+                    <ArrowRight className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
